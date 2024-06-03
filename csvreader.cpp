@@ -53,7 +53,7 @@ void CSVReader::parseFile(const QString& fileName)
     QTextStream in(&file);
     csvModel->clear();
     bool isFirstLine = true;
-    QString delim = ";";
+    QString delim = ui->commaButton->isChecked() ? "," : ";";
     while (!in.atEnd()) {
         auto line = in.readLine();
         auto values = line.split(delim);
