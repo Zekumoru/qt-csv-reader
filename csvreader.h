@@ -31,5 +31,6 @@ private:
 
     void parseFile(const QString& fileName);
     void parseLineValues(const QStringList& values, const QString& delim);
+    QStandardItem *createItem(const QString &value);
 };
 #endif // CSVREADER_H

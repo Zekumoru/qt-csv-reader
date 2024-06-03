@@ -89,7 +89,7 @@ void CSVReader::parseLineValues(const QStringList& values, const QString& delim)
                 inQuotes = false;
                 // remove the ending double quotes
                 auto value = currentField.mid(0, currentField.length() - 1);
-                items.append(new QStandardItem(value));
+                items.append(createItem(value));
                 currentField = "";
             }
 
@@ -99,7 +99,7 @@ void CSVReader::parseLineValues(const QStringList& values, const QString& delim)
         // append any tokens including empty ones to table
         // except if it starts with quotes
         if (token.isEmpty() || token.front() != '"') {
-            items.append(new QStandardItem(token));
+            items.append(createItem(token));
             continue;
         }
 
@@ -111,7 +111,7 @@ void CSVReader::parseLineValues(const QStringList& values, const QString& delim)
             inQuotes = false;
             // remove the ending double quotes
             auto value = currentField.mid(0, currentField.length() - 1);
-            items.append(new QStandardItem(value));
+            items.append(createItem(value));
             currentField = "";
         }
     }
@@ -121,9 +121,15 @@ void CSVReader::parseLineValues(const QStringList& values, const QString& delim)
     if (!currentField.isEmpty()) {
         // remove the ending double quotes
         auto value = currentField.mid(0, currentField.length() - 1);
-        items.append(new QStandardItem(value));
+        items.append(createItem(value));
     }
 
     csvModel->appendRow(items);
 }
 
+QStandardItem *CSVReader::createItem(const QString &value)
+{
+    auto item = new QStandardItem(value);
+    item->setEditable(false);
+    return item;
+}
