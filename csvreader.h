@@ -1,9 +1,10 @@
 #ifndef CSVREADER_H
 #define CSVREADER_H
 
+#include "qnumberfilterproxymodel.h"
+
 #include <QWidget>
 #include <QStandardItemModel>
-#include <QSortFilterProxyModel>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -26,7 +27,7 @@ private slots:
 private:
     Ui::CSVReader *ui;
     QStandardItemModel *csvModel;
-    QSortFilterProxyModel *proxyModel;
+    QNumberFilterProxyModel *proxyModel;
 
     void parseFile(const QString& fileName);
     void parseLineValues(const QStringList& values, const QString& delim);

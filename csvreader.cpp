@@ -14,7 +14,7 @@ CSVReader::CSVReader(QWidget *parent)
     connect(ui->searchEdit, &QLineEdit::textChanged, this, &CSVReader::onSearchEditTextChanged);
 
     csvModel = new QStandardItemModel(this);
-    proxyModel = new QSortFilterProxyModel(this);
+    proxyModel = new QNumberFilterProxyModel(this);
     proxyModel->setSourceModel(csvModel);
     proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
     proxyModel->setFilterKeyColumn(-1); // Filter all columns
