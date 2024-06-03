@@ -34,6 +34,16 @@ void CSVReader::onOpenFileButtonClicked()
     if (fileName.isEmpty())
         return;
 
+    parseFile(fileName);
+}
+
+void CSVReader::onSearchEditTextChanged(const QString &text)
+{
+    proxyModel->setFilterFixedString(text);
+}
+
+void CSVReader::parseFile(const QString& fileName)
+{
     QFile file(fileName);
     if (!file.open(QIODevice::ReadOnly))
         return;
@@ -43,9 +53,10 @@ void CSVReader::onOpenFileButtonClicked()
     QTextStream in(&file);
     csvModel->clear();
     bool isFirstLine = true;
+    QString delim = ";";
     while (!in.atEnd()) {
-        QString line = in.readLine();
-        QStringList values = line.split(",");
+        auto line = in.readLine();
+        auto values = line.split(delim);
 
         if (isFirstLine) {
             csvModel->setHorizontalHeaderLabels(values);
@@ -53,19 +64,66 @@ void CSVReader::onOpenFileButtonClicked()
             continue;
         }
 
-        QList<QStandardItem *> items;
-        for (const QString &text : values) {
-            items.append(new QStandardItem(text));
-        }
-        csvModel->appendRow(items);
+        parseLineValues(values, delim);
     }
 
     file.close();
-
     ui->tableView->resizeColumnsToContents(); // resize headers
 }
 
-void CSVReader::onSearchEditTextChanged(const QString &text)
+void CSVReader::parseLineValues(const QStringList& values, const QString& delim)
 {
-    proxyModel->setFilterFixedString(text);
+    QList<QStandardItem *> items;
+    // currentField is used for when there are
+    // the delimeters in fields that have double quotes
+    QString currentField;
+    bool inQuotes = false;
+
+    for (const QString &token : values) {
+        if (inQuotes) {
+            // since the getline in the while above already takes the delimeter
+            // we bring it back here plus the token
+            currentField += delim + token;
+            // if the token ends in quotes, then we finished this field
+            if (!token.isEmpty() && token.back() == '"') {
+                inQuotes = false;
+                // remove the ending double quotes
+                auto value = currentField.mid(0, currentField.length() - 1);
+                items.append(new QStandardItem(value));
+                currentField = "";
+            }
+
+            continue;
+        }
+
+        // append any tokens including empty ones to table
+        // except if it starts with quotes
+        if (token.isEmpty() || token.front() != '"') {
+            items.append(new QStandardItem(token));
+            continue;
+        }
+
+        // handle fields in quotes
+        inQuotes = true;
+        currentField = token.mid(1); // remove starting double quotes
+
+        if (token.back() == '"') {
+            inQuotes = false;
+            // remove the ending double quotes
+            auto value = currentField.mid(0, currentField.length() - 1);
+            items.append(new QStandardItem(value));
+            currentField = "";
+        }
+    }
+
+    // if there are no more tokens but we were inside a double quoted field
+    // then we have to append it
+    if (!currentField.isEmpty()) {
+        // remove the ending double quotes
+        auto value = currentField.mid(0, currentField.length() - 1);
+        items.append(new QStandardItem(value));
+    }
+
+    csvModel->appendRow(items);
 }
+

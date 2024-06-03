@@ -27,5 +27,8 @@ private:
     Ui::CSVReader *ui;
     QStandardItemModel *csvModel;
     QSortFilterProxyModel *proxyModel;
+
+    void parseFile(const QString& fileName);
+    void parseLineValues(const QStringList& values, const QString& delim);
 };
 #endif // CSVREADER_H
